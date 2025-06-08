@@ -3,7 +3,6 @@
 
 #define MAX_TAREFAS 100
 #define TAM_CAMPOS 50
-
 #define TITULO 0
 #define DESCRICAO 1
 #define PRIORIDADE 2
@@ -11,6 +10,9 @@
 
 void cadastrarTarefa(char tarefas[][4][TAM_CAMPOS], int *quantidade);
 void listarTarefas(char tarefas[][4][TAM_CAMPOS], int quantidade);
+void editarTarefa(char tarefas[][4][TAM_CAMPOS], int indice);
+void excluirTarefa(char tarefas[][4][TAM_CAMPOS], int *quantidade, int indice);
+void salvarTarefasEmArquivo(char tarefas[][4][TAM_CAMPOS], int quantidade);
 
 int main() {
     char tarefas[MAX_TAREFAS][4][TAM_CAMPOS];
@@ -36,14 +38,30 @@ int main() {
             case 2:
                 listarTarefas(tarefas, quantidade);
                 break;
-            case 3:
-                // editarTarefa();
+            case 3: {
+                int i;
+                printf("Digite o índice da tarefa a editar: ");
+                scanf("%d", &i);
+                getchar();
+                if (i >= 0 && i < quantidade)
+                    editarTarefa(tarefas, i);
+                else
+                    printf("Índice inválido.\n");
                 break;
-            case 4:
-                // excluirTarefa();
+            }
+            case 4: {
+                int i;
+                printf("Digite o índice da tarefa a excluir: ");
+                scanf("%d", &i);
+                getchar();
+                if (i >= 0 && i < quantidade)
+                    excluirTarefa(tarefas, &quantidade, i);
+                else
+                    printf("Índice inválido.\n");
                 break;
+            }
             case 5:
-                // salvarTarefasEmArquivo();
+                salvarTarefasEmArquivo(tarefas, quantidade);
                 break;
             case 6:
                 printf("Saindo...\n");
@@ -55,7 +73,6 @@ int main() {
 
     return 0;
 }
-
 void cadastrarTarefa(char tarefas[][4][TAM_CAMPOS], int *quantidade) {
     printf("Titulo: ");
     fgets(tarefas[*quantidade][TITULO], TAM_CAMPOS, stdin);
@@ -90,4 +107,53 @@ void listarTarefas(char tarefas[][4][TAM_CAMPOS], int quantidade) {
         printf("Prioridade: %s\n", tarefas[i][PRIORIDADE]);
         printf("Status: %s\n", tarefas[i][STATUS]);
     }
+}
+void editarTarefa(char tarefas[][4][TAM_CAMPOS], int indice) {
+    printf("Novo titulo: ");
+    fgets(tarefas[indice][TITULO], TAM_CAMPOS, stdin);
+    tarefas[indice][TITULO][strcspn(tarefas[indice][TITULO], "\n")] = 0;
+
+    printf("Nova descricao: ");
+    fgets(tarefas[indice][DESCRICAO], TAM_CAMPOS, stdin);
+    tarefas[indice][DESCRICAO][strcspn(tarefas[indice][DESCRICAO], "\n")] = 0;
+
+    printf("Nova prioridade: ");
+    fgets(tarefas[indice][PRIORIDADE], TAM_CAMPOS, stdin);
+    tarefas[indice][PRIORIDADE][strcspn(tarefas[indice][PRIORIDADE], "\n")] = 0;
+
+    printf("Novo status: ");
+    fgets(tarefas[indice][STATUS], TAM_CAMPOS, stdin);
+    tarefas[indice][STATUS][strcspn(tarefas[indice][STATUS], "\n")] = 0;
+
+    printf("Tarefa editada com sucesso!\n");
+}
+
+void excluirTarefa(char tarefas[][4][TAM_CAMPOS], int *quantidade, int indice) {
+    for (int i = indice; i < *quantidade - 1; i++) {
+        for (int j = 0; j < 4; j++) {
+            strcpy(tarefas[i][j], tarefas[i + 1][j]);
+        }
+    }
+    (*quantidade)--;
+    printf("Tarefa excluída com sucesso!\n");
+}
+
+void salvarTarefasEmArquivo(char tarefas[][4][TAM_CAMPOS], int quantidade) {
+    FILE *arquivo = fopen("tarefas.txt", "w");
+    if (!arquivo) {
+        printf("Erro ao criar arquivo.\n");
+        return;
+    }
+
+    for (int i = 0; i < quantidade; i++) {
+        fprintf(arquivo, "Tarefa %d:\nTitulo: %s\nDescricao: %s\nPrioridade: %s\nStatus: %s\n\n",
+                i + 1,
+                tarefas[i][TITULO],
+                tarefas[i][DESCRICAO],
+                tarefas[i][PRIORIDADE],
+                tarefas[i][STATUS]);
+    }
+
+    fclose(arquivo);
+    printf("Tarefas salvas no arquivo 'tarefas.txt'.\n");
 }
